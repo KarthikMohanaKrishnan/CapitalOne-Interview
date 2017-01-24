@@ -1,0 +1,49 @@
+<html>
+<head>
+<script type="text/javascript"
+	src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"> </script>
+<script>
+
+$(function() {
+	var entry = [];
+	var value = [];
+	var dmJSON = "webapi/transactions/GetTransactionsAggregate";
+	$.getJSON( dmJSON, function(data) {
+	  console.log("Data"+data);
+	  $.each(data.allTransaction.entry, function(key, v) {
+		   
+		  var tblRow = "<tr>" + "<td>" + v.key + "</td>" + "<td>" + v.value + "</td>"  +"</tr>"
+	       $(tblRow).appendTo("#entrydata tbody");
+	 }); 
+	
+	});
+
+});
+
+
+
+</script>
+</head>
+
+<body>
+ <h2>Transaction's Average</h2>
+	<div class="wrapper">
+		<div class="profile">
+			<table id="entrydata" border="1">
+				<thead>
+					<th>Year</th>
+					<th>Details</th>
+
+				</thead>
+				<tbody>
+
+				</tbody>
+			</table>
+
+		</div>
+	</div>
+	<p>
+Note: Transactions will take 30 to 120 seconds depends on the machine its running. Thank you for your patience !
+</body>
+
+</html>

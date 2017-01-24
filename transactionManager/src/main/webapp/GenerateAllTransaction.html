@@ -1,0 +1,55 @@
+<html>
+<head>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"> </script>
+<script>
+
+$(function() {
+	var transactions = [];
+	var dmJSON = "webapi/transactions/GetAllTransaction";
+	$.getJSON( dmJSON, function(data) {
+	  console.log("Data"+data);
+	   $.each(data.transactions, function(i, f) {
+	      var tblRow = "<tr>" + "<td>" + f.accountId + "</td>" + "<td>" + f.aggregationTime + "</td>" + "<td>" + f.amount + "</td>" + "<td> " + f.categorization + "</td>" +  "<td>" + f.clearDate + "</td>" +
+	        "<td>" + f.merchant + "</td>" +
+	        "<td>" + f.pending + "</td>" +
+	        "<td>" + f.rawMerchant + "</td>" +
+	        "<td>" + f.transactionId + "</td>" +
+	        "<td>" + f.transactionTime + "</td>" +"</tr>"
+	       $(tblRow).appendTo("#entrydata tbody");
+	 });
+
+	});
+
+});
+</script>
+</head>
+
+<body>
+
+<div class="wrapper">
+<div class="profile">
+<table id= "entrydata" border="1">
+<thead>
+        <th>AccountID</th>
+        <th>Aggregation Time</th>
+        <th>Amount</th>
+    	<th>Categorization</th>
+        <th>Clear Data</th>
+        <th>Merchant</th>
+        <th>Pending</th>
+        <th>RawMerchant</th>
+    	<th>TransactionId</th>
+        <th>TransactionTime</th>
+    </thead>
+  <tbody>
+
+   </tbody>
+</table>
+
+</div>
+</div>
+<p>
+Note: Transactions will take 30 to 120 seconds depends on the machine its running. Thank you for your patience !
+</body>
+
+</html>
