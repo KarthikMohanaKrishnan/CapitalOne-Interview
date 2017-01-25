@@ -7,12 +7,16 @@
 $(function() {
 	var entry = [];
 	var value = [];
-	var dmJSON = "webapi/transactions/GetProjectedTransactions";
+	var noTransaction = "No Transactions";
+	var dmJSON = "webapi/transactions/GetTrxnsAggregateIgnoringDonuts";
 	$.getJSON( dmJSON, function(data) {
-	  console.log("Data"+data);
-	  $.each(data.allTransactionAverage.entry, function(key, v) {
-		   
-		  var tblRow = "<tr>" + "<td>" + v.key + "</td>" + "<td>" + v.value + "</td>"  +"</tr>"
+	  $.each(data.allTransaction.entry, function(key, v) {
+		  var result = (v.value).slice(1, -1);
+		 // result.replace(/null/i, "\"\"");
+		  if(result === '') {
+		      result = noTransaction;
+		    }
+		  var tblRow = "<tr>" + "<td>" + v.key + "</td>" + "<td>" + result + "</td>"  +"</tr>"
 	       $(tblRow).appendTo("#entrydata tbody");
 	 }); 
 	
@@ -43,7 +47,7 @@ $(function() {
 		</div>
 	</div>
 	<p>
-Note: Transactions will take 30 to 120 seconds depends on the machine its running. Thank you for your patience !
+Note: Transactions will take 30 to 120 seconds depending on the machine its running. Thank you for your patience !
 </body>
 
 </html>

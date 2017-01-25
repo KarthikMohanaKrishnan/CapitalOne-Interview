@@ -36,7 +36,7 @@
 		</li>
 		<li>
 			<p>
-				<a href="Crystalball.html">Crystal Ball</a>
+				<a href="CrystalBall.html">Crystal Ball</a>
 			</p>
 		</li>
 	</ol>

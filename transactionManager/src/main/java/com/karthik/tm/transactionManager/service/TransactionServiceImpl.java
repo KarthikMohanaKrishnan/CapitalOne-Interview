@@ -1,7 +1,5 @@
 package com.karthik.tm.transactionManager.service;
 
-import java.io.IOException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -12,15 +10,16 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 
-import com.fasterxml.jackson.core.JsonParseException;
+import org.apache.log4j.Logger;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.karthik.tm.transactionManager.model.Transaction;
 import com.karthik.tm.transactionManager.model.TransactionAverageResponseMap;
 import com.karthik.tm.transactionManager.model.TransactionMonthlyResponseMap;
 import com.karthik.tm.transactionManager.model.TransactionResponse;
 import com.karthik.tm.transactionManager.model.TransactionResponseMap;
+import com.karthik.tm.transactionManager.resource.TransactionResource;
 
 /**
  * @author Karthik M
@@ -30,25 +29,40 @@ public class TransactionServiceImpl  implements TransactionService{
 
 	TransactionHelper transactionHelper = new TransactionHelper();
 
+
+	final static Logger logger = Logger.getLogger(TransactionServiceImpl.class);
+
 	@Override
-	public TransactionResponse getAllTransactions()
-			throws JsonParseException, JsonMappingException, IOException {
+	public TransactionResponse getAllTransactions(){
 		TransactionResponse transactions = null;
 		WebTarget target;
 		Client client = ClientBuilder.newClient();
 		target = client.target(TransactionConstants.GET_ALL_TRXNS_ENDPOINT);
+
+		if(logger.isDebugEnabled()){
+			logger.debug("getAllTransactions URL endpoint"+TransactionConstants.GET_ALL_TRXNS_ENDPOINT);
+		}
+
 		String args = TransactionUtil.getInputPopulated();
 		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		String responseString = target.request().accept(MediaType.APPLICATION_JSON)
 				.post(Entity.entity(args, MediaType.APPLICATION_JSON), String.class);
-		transactions = mapper.readValue(responseString, TransactionResponse.class);
+		try {
+			transactions = mapper.readValue(responseString, TransactionResponse.class);
+		} catch (Exception e) {
+			logger.error("Exception in mapping the get all transactions response::"+e.getMessage());
+		} 
+
+		if(logger.isDebugEnabled()){
+			logger.debug("Response from get all transactions endpoint::"+transactions.getTransactions());
+		}
+
 		return transactions;
 	}
 
 
 	@Override
-	public TransactionMonthlyResponseMap getTransactionForMonth(String year, String month) throws JsonParseException, JsonMappingException, IOException {
-
+	public TransactionMonthlyResponseMap getTransactionForMonth(String year, String month){
 		TransactionMonthlyResponseMap transactionForTheMonth = new TransactionMonthlyResponseMap();
 		TransactionResponse transactionResponse = getAllTransactions();
 		List<Transaction> transactionList = transactionResponse.getTransactions();
@@ -56,48 +70,64 @@ public class TransactionServiceImpl  implements TransactionService{
 		return transactionForTheMonth;
 	}
 	@Override
-	public TransactionResponseMap getTransactionsAverage() throws JsonParseException, JsonMappingException, IOException, ParseException {
+	public TransactionResponseMap getTransactionsAverage() {
 
 		TransactionResponseMap allTransactionMap = new TransactionResponseMap();
 		TransactionResponse transactionResponse = getAllTransactions();
 		List<Transaction> transactionList = transactionResponse.getTransactions();
-		allTransactionMap = transactionHelper.getTransactionsAverage(transactionList);
+		try {
+			allTransactionMap = transactionHelper.getTransactionsAverage(transactionList);
+		} catch (Exception e) {
+			logger.error("Exception in mapping the transactions while calculating average::"+e.getMessage());
+		} 
 		return allTransactionMap;
 	}
 
 	@Override
-	public TransactionAverageResponseMap getYearlyAverage() throws JsonParseException, JsonMappingException, IOException, ParseException {
+	public TransactionAverageResponseMap getYearlyAverage() {
 
 		TransactionAverageResponseMap yearlyAvgMap = new TransactionAverageResponseMap();
 		TransactionResponse transactionResponse = getAllTransactions();
 		List<Transaction> transactionList = transactionResponse.getTransactions();
-		yearlyAvgMap = transactionHelper.getYearlyAverage(transactionList);
+		try {
+			yearlyAvgMap = transactionHelper.getYearlyAverage(transactionList);
+		} catch (Exception e) {
+			logger.error("Exception in mapping the yearly average for transactions response::"+e.getMessage());
+		} 
 		return yearlyAvgMap;
 	}
 
 	@Override
-	public TransactionResponseMap getTrxnWithoutCC() throws JsonParseException, JsonMappingException, IOException, ParseException {
+	public TransactionResponseMap getTrxnWithoutCC(){
 
 		TransactionResponseMap allTransactionMap = new TransactionResponseMap();
 		TransactionResponse transactionResponse = getAllTransactions();
 		List<Transaction> transactionList = transactionResponse.getTransactions();
-		allTransactionMap = transactionHelper.getTransactionIgnoringCC(transactionList);
+		try {
+			allTransactionMap = transactionHelper.getTransactionIgnoringCC(transactionList);
+		} catch (Exception e) {
+			logger.error("Exception in mapping the transactions after ignoring credit card transactions response::"+e.getMessage());
+		} 
 		return allTransactionMap;
 	}
 
 	@Override
-	public TransactionResponseMap getTransactionsIgnoringDonuts() throws JsonParseException, JsonMappingException, IOException, ParseException {
+	public TransactionResponseMap getTransactionsIgnoringDonuts(){
 
 		TransactionResponseMap allTransactionMap = new TransactionResponseMap();
 		TransactionResponse transactionResponse = getAllTransactions();
 		List<Transaction> transactionList = transactionResponse.getTransactions();
-		allTransactionMap = transactionHelper.getTransactionsIgnoringDonuts(transactionList);
+		try {
+			allTransactionMap = transactionHelper.getTransactionsIgnoringDonuts(transactionList);
+		}  catch (Exception e) {
+			logger.error("Exception in mapping the transactions after ignoring donut transactions response::"+e.getMessage());
+		} 
 		return allTransactionMap;
 	}
 
 
 
-	public TransactionAverageResponseMap getProjectedTransactions() throws JsonParseException, JsonMappingException, IOException, ParseException {
+	public TransactionAverageResponseMap getProjectedTransactions(){
 
 		Calendar now = Calendar.getInstance();  
 		int currentMonth = now.get(Calendar.MONTH); 
@@ -117,23 +147,43 @@ public class TransactionServiceImpl  implements TransactionService{
 		TransactionResponse transactionResponse = getAllTransactions();
 		List<Transaction> transactionList = transactionResponse.getTransactions();
 		transactionList.addAll(projectedTrxnsMasterList);
-		
-		TransactionAverageResponseMap trxnAvgMap = transactionHelper.getYearlyAverage(transactionList);
+
+		TransactionAverageResponseMap trxnAvgMap = null;
+		try {
+			trxnAvgMap = transactionHelper.getYearlyAverage(transactionList);
+		} catch (Exception e) {
+			logger.error("Exception in mapping the yearly average for projected transactions response::"+e.getMessage());
+		} 
+
 		return trxnAvgMap;
 
 	}
 
-	public TransactionResponse makeProjectedTransactionsCall(int year,int month)
-			throws JsonParseException, JsonMappingException, IOException {
+	public TransactionResponse makeProjectedTransactionsCall(int year,int month){
 		TransactionResponse projectedTransactions = null;
 		WebTarget target;
 		Client client = ClientBuilder.newClient();
 		target = client.target(TransactionConstants.GET_PROJECTED_TRXNS_ENDPOINT);
+		if(logger.isDebugEnabled()){
+			logger.debug("getProjectedTransactions URL endpoint"+TransactionConstants.GET_PROJECTED_TRXNS_ENDPOINT);
+		}
+
+		//We are incrementing the month because service takes month from 1-12 , java Calendar gives from 0-11
 		String args = TransactionUtil.getInputPopulatedForProjectedTrxns(year,month+1);
 		ObjectMapper mapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 		String responseString = target.request().accept(MediaType.APPLICATION_JSON)
 				.post(Entity.entity(args, MediaType.APPLICATION_JSON), String.class);
-		projectedTransactions = mapper.readValue(responseString, TransactionResponse.class);
+		try{
+			projectedTransactions = mapper.readValue(responseString, TransactionResponse.class);
+		}
+		catch (Exception e) {
+			logger.error("Exception in mapping the get projected transactions response::"+e.getMessage());
+		} 
+
+		if(logger.isDebugEnabled()){
+			logger.debug("Response from get projected transactions endpoint::"+projectedTransactions.getTransactions());
+		}
+
 		return projectedTransactions;
 	}
 

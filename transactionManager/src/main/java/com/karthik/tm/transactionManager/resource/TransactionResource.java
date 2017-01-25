@@ -27,7 +27,8 @@ import com.karthik.tm.transactionManager.service.TransactionServiceImpl;
 public class TransactionResource {
 	
 	TransactionServiceImpl trxnService = new TransactionServiceImpl();
-    
+	
+	
     @GET  
     @Path("/GetAllTransaction")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -89,7 +90,7 @@ public class TransactionResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
 	public Response getTrxnsAggregateIgnoringDonuts() throws JsonParseException, JsonMappingException, IOException, ParseException { 
-    	TransactionResponseMap allTransactionMap = trxnService.getTrxnWithoutCC();
+    	TransactionResponseMap allTransactionMap = trxnService.getTransactionsIgnoringDonuts();
 		return  Response.ok(allTransactionMap, MediaType.APPLICATION_JSON).build();
 	} 
 }

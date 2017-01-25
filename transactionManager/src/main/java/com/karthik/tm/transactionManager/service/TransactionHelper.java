@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import org.apache.log4j.Logger;
+
 import com.karthik.tm.transactionManager.model.Transaction;
 import com.karthik.tm.transactionManager.model.TransactionAverageResponseMap;
 import com.karthik.tm.transactionManager.model.TransactionMonthlyResponseMap;
@@ -25,6 +27,8 @@ import com.karthik.tm.transactionManager.model.TransactionResponseMap;
  *
  */
 public class TransactionHelper {
+
+	final static Logger logger = Logger.getLogger(TransactionHelper.class);
 
 	public TransactionMonthlyResponseMap getAverageForMonth(List<Transaction> transactionList,String month, String year)
 	{
@@ -62,7 +66,7 @@ public class TransactionHelper {
 			}
 			catch(Exception e)
 			{
-				e.printStackTrace();
+				logger.error("Exception while calculating average monthly for transactions"+ e.getMessage() );
 			}
 		}
 
@@ -71,6 +75,10 @@ public class TransactionHelper {
 
 		TransactionMonthlyResponseMap transactionMonthlyResponseMap = new TransactionMonthlyResponseMap();
 		transactionMonthlyResponseMap.setYearlyAverageMap(transactionMap);
+
+		if(logger.isDebugEnabled()){
+			logger.debug("Transaction Monthly Response ::"+transactionMonthlyResponseMap);
+		}
 
 		return transactionMonthlyResponseMap;
 	}
@@ -135,6 +143,10 @@ public class TransactionHelper {
 
 		}
 		responseMap.setAllTransaction(allTransaction);
+		
+		if(logger.isDebugEnabled()){
+			logger.debug("Transactions Average Response ::"+responseMap);
+		}
 		return responseMap;
 	}
 
@@ -191,6 +203,10 @@ public class TransactionHelper {
 
 		TransactionAverageResponseMap yearlyAvgMap = new TransactionAverageResponseMap();
 		yearlyAvgMap.setAllTransactionAverage(avgTrxnMap);
+		
+		if(logger.isDebugEnabled()){
+			logger.debug("Transactions Yearly Average Response ::"+yearlyAvgMap);
+		}
 		return yearlyAvgMap;
 
 	}
@@ -257,6 +273,10 @@ public class TransactionHelper {
 
 		}
 		responseMap.setAllTransaction(allTransaction);
+		
+		if(logger.isDebugEnabled()){
+			logger.debug("Transactions Average ignoring donut transactions response ::"+responseMap);
+		}
 		return responseMap;
 	}
 
@@ -265,7 +285,6 @@ public class TransactionHelper {
 		if(transaction.getMerchant().equalsIgnoreCase("Krispy Kreme Donuts") || transaction.getMerchant().equalsIgnoreCase("DUNKIN #336784")){
 			isDonutTrxn = true;
 		}
-
 		return isDonutTrxn;
 
 	}
@@ -302,14 +321,22 @@ public class TransactionHelper {
 			}
 
 		}
+		
+		if(logger.isDebugEnabled()){
+			logger.debug("Credit Card Transactions List :: "+psudoTrxnList.size());
+			logger.debug("Master Transactions List :: "+transactionList.size());
+		}
 
-		System.out.println("Credit Card Transactions List :: "+psudoTrxnList.size());
-		System.out.println("Master Transactions List :: "+transactionList.size());
 		transactionList.removeAll(psudoTrxnList);
-		System.out.println("After ignoring CC Transactions List :: "+transactionList.size());
+	
 		TransactionResponseMap transactionResponseMap = new TransactionResponseMap();
 		transactionResponseMap=	getTransactionsAverage(transactionList);
+		
+		if(logger.isDebugEnabled()){
+			logger.debug("Transactions List after removing credit card transactions:: "+transactionList.size());
+			logger.debug("Transaction Average response wihtout Credit card transactions response::"+transactionResponseMap);
+		}
 		return transactionResponseMap;
 	}
-	
+
 }
